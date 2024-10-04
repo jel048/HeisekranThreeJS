@@ -61,13 +61,26 @@ function handleKeyDown(event) {
 }
 
 function addSceneObjects() {
-    // Dersom aktuelt å laste teksturer, gjøres dette først, slik:
     const loadingManager = new THREE.LoadingManager();
+	const cubeTextureLoader = new THREE.CubeTextureLoader(loadingManager);
+	ri.cubeTexture = cubeTextureLoader
+	.setPath('../../../assets/skyboxes/valley/')
+	.load(
+		[
+		'../../../assets/skyboxes/valley/valley_rt.jpg',
+		'../../../assets/skyboxes/valley/valley_lf.jpg',
+		'../../../assets/skyboxes/valley/valley_up.jpg',
+		'../../../assets/skyboxes/valley/valley_dn.jpg',
+		'../../../assets/skyboxes/valley/valley_bk.jpg',
+		'../../../assets/skyboxes/valley/valley_ft.jpg',
+		]
+	)
     const textureLoader = new THREE.TextureLoader(loadingManager);
     const textureObjects = [];
     textureObjects[0] = textureLoader.load('../../../assets/textures/metal_tread_plate1_512x512_color.jpg');
     loadingManager.onLoad = () => {
       // Fortsetter...
+	  ri.scene.background = ri.cubeTexture;
       addSceneObjectsContinued(textureObjects);
     }
   }

@@ -4,8 +4,8 @@ import * as THREE from "three";
 export function createPlane(ri, textureObjects){
     let colorMap = textureObjects[0];
 
-    let gPlane = new THREE.PlaneGeometry(100, 100, 10, 10);
-			let mPlane = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.DoubleSide, wireframe:false });
+    let gPlane = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+			let mPlane = new THREE.MeshStandardMaterial({ map : colorMap, side: THREE.DoubleSide, wireframe:false });
 			let meshPlane = new THREE.Mesh(gPlane, mPlane);
 			meshPlane.rotation.x = Math.PI / 2;
 			meshPlane.receiveShadow = true;	//NB!
@@ -108,7 +108,8 @@ export function createCraneBody(ri){
     craneBody.add(blackBase);
 
     let whiteBaseGeometry = new THREE.BoxGeometry(25,  1, 12);
-    let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.6});
+    let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.9});
+    whiteBaseMaterial.envMap = ri.cubeTexture;
     let whiteBase =  new THREE.Mesh(whiteBaseGeometry, whiteBaseMaterial);
     whiteBase.castShadow = true;
     whiteBase.position.x = 5;
@@ -185,8 +186,10 @@ export function createCraneBody(ri){
 export function createStyrHus(ri) {
 
     let styrHus = new THREE.Group();
-    let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.6});
+    let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.9});
+    whiteBaseMaterial.envMap = ri.cubeTexture;
     let redBaseMaterial = new THREE.MeshStandardMaterial({color: 0xee2222, roughness: 0.1, metalness : 0.9});
+    redBaseMaterial.envMap = ri.cubeTexture;
     //rød frontdel
     let redPartShape = new THREE.Shape();
     redPartShape.moveTo(0,0);
