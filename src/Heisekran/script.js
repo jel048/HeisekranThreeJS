@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
 import GUI from "lil-gui";
-import { createPlane, createTire } from "./helpers";
+import { createPlane, createSupportArmPair, createCraneBody, createTirePair, createStyrHus } from "./helpers";
 
 const ri = {
 	currentlyPressedKeys:[]
@@ -31,9 +31,9 @@ export function main() {
 
 	// Kamera:
 	ri.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-	ri.camera.position.x = 2;
-	ri.camera.position.y = 2;
-	ri.camera.position.z = 2;
+	ri.camera.position.x = -1;
+	ri.camera.position.y =10;
+	ri.camera.position.z = 20;
 
 	// TrackballControls:
 	ri.controls = new TrackballControls(ri.camera, ri.renderer.domElement);
@@ -85,9 +85,12 @@ function addLights() {
 	ambientFolder.addColor(ambientLight1, 'color').name("Color");
 
 	// Pointlight:
-	let pointLight = new THREE.PointLight(0xff9000, 100);
+	let pointLight = new THREE.PointLight(0xffffff, 1000);
 	pointLight.visible = true;
-	pointLight.position.set(-3, 3, 2);
+	pointLight.position.set(10, 20, 6);
+	pointLight.shadow.mapSize.width = 1024;
+	pointLight.shadow.mapSize.height = 1024;
+	pointLight.castShadow = true;
 	ri.scene.add(pointLight);
 	// Viser lyskilden:
 	const pointLightHelper = new THREE.PointLightHelper( pointLight, 1 );
@@ -98,7 +101,7 @@ function addLights() {
 	pointLigthFolder.add(pointLight, 'visible').name("On/Off").onChange(value => {
 		pointLightHelper.visible = value;
 	});
-	pointLigthFolder.add(pointLight, 'intensity').min(0).max(1).step(0.01).name("Intensity");
+	pointLigthFolder.add(pointLight, 'intensity').min(0).max(1000).step(10).name("Intensity");
 	pointLigthFolder.addColor(pointLight, 'color').name("Color");
 	pointLigthFolder.add(pointLight.position, 'y').min(0).max(10).step(0.001).name("Height");
 
@@ -106,10 +109,11 @@ function addLights() {
 	let directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 	directionalLight.visible = false;
 	directionalLight.position.set(0, 6, 0);
+	directionalLight.castShadow = true;
 	ri.scene.add(directionalLight);
 	// Viser lyskilden:
 	const directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight, 10, 0xff0000);
-	directionalLightHelper.visible = true;
+	directionalLightHelper.visible = false;
 	ri.scene.add(directionalLightHelper);
 
 	//lil-gui:
@@ -158,11 +162,75 @@ function handleKeys(delta) {
 }
 
 function addSceneObjectsContinued(textureObjects) {
-    
-	let tire = createTire()
-	tire.position.y = 5
+	let crane = createCrane(textureObjects)
+	ri.scene.add(crane)
 
-	ri.scene.add(tire);
 	createPlane(ri, textureObjects)
     animate(0);
+  }
+
+
+
+
+
+
+
+
+
+function createCrane(textureObjects){
+	let Crane = new THREE.Group();
+
+	let craneBody = craneBodyWithWheels(ri);
+	Crane.add(craneBody);
+    
+	let styrHus = createStyrHus(ri);
+	styrHus.position.set(-25.5, 2.5, -6);
+	Crane.add(styrHus);
+
+	let supportArms1 = createSupportArmPair()
+	supportArms1.position.set(-2, 4.7, 6.5)
+	Crane.add(supportArms1)
+
+	let supportArms2 = createSupportArmPair()
+	supportArms2.position.set(18, 4.7, 6.5)
+	Crane.add(supportArms2)
+
+	return Crane
+}
+
+
+
+
+
+
+  function craneBodyWithWheels(){
+	let grp = new THREE.Group();
+
+	let craneBody = createCraneBody(ri)
+	grp.add(craneBody)
+
+	let tirePair1 = createTirePair(ri)
+	tirePair1.position.set(-16, 2.5, 0)
+
+	let tirepair2 = createTirePair(ri)
+	tirepair2.position.set(-11, 2.5, 0)
+
+	let tirepair3 = createTirePair(ri)
+	tirepair3.position.set(5, 2.5, 0)
+
+	let tirepair4 = createTirePair(ri)
+	tirepair4.position.set(10, 2.5, 0)
+
+	let tirepair5 = createTirePair(ri)
+	tirepair5.position.set(15, 2.5, 0)
+
+
+	grp.add(tirePair1)
+	grp.add(tirepair2)
+	grp.add(tirepair3)
+	grp.add(tirepair4)
+	grp.add(tirepair5)
+
+	return grp
+
   }
