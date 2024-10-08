@@ -28,14 +28,15 @@ export function main() {
 
 	//animasjonsInfo
 	ri.animation = {
-		boomAngle: -Math.PI/3,
-		secondBoomExtent : 40,
+		boomAngle: 0,
+		secondBoomExtent : 10,
 		supportArmExtent : 6,
 		supportFootExtent: -1.5,
 		craneBoomBaseAngle: 0
 
 
 	}
+	
 
 	ri.selectedControl = 1;
 
@@ -182,14 +183,41 @@ function animate(currentTime) {
 
 	let delta = ri.clock.getDelta();
 	let elapsed = ri.clock.getElapsedTime();
+	const craneBoomBase = ri.scene.getObjectByName('craneBoomBase')
+	const firstBoom = ri.scene.getObjectByName('firstBoom')
+	const secondBoom = ri.scene.getObjectByName('secondBoom')
+	const supportArm1 = ri.scene.getObjectByName('supportArm11')
+	const supportArm2 = ri.scene.getObjectByName('supportArm12')
+	const supportArm3 = ri.scene.getObjectByName('supportArm21')
+	const supportArm4 = ri.scene.getObjectByName('supportArm22')
+	const supportFoot1 = ri.scene.getObjectByName('supportFoot11')
+	const supportFoot2 = ri.scene.getObjectByName('supportFoot12')
+	const supportFoot3 = ri.scene.getObjectByName('supportFoot21')
+	const supportFoot4 = ri.scene.getObjectByName('supportFoot22')
+	
+
 
 
 
 	//Oppdater trackball-kontrollen:
 	ri.controls.update();
 
+	//Oppdater Wire
+	updateWireMesh()
+
 	//Sjekker input:
-	handleKeys(delta);
+	handleKeys(delta,
+		craneBoomBase,
+		firstBoom,
+		secondBoom, 
+		supportArm1,
+		supportArm2,
+		supportArm3,
+		supportArm4, 
+		supportFoot1, 
+		supportFoot2,
+		supportFoot3, 
+		supportFoot4);
 
 	//Tegner scenen med gitt kamera:
 	renderScene();
@@ -210,28 +238,121 @@ function onWindowResize() {
 }
 
 //Sjekker tastaturet:
-function handleKeys(delta) {
+function handleKeys(delta,
+	craneBoomBase,
+	firstBoom, 
+	secondBoom,
+	supportArm1,
+	supportArm2,
+	supportArm3,
+	supportArm4, 
+	supportFoot1, 
+	supportFoot2,
+	supportFoot3, 
+	supportFoot4) {
 
 	if(ri.selectedControl == 1){
 		//hev / senk støttefot
-		if (ri.currentlyPressedKeys['KeyW']) {
-			if(ri.animation.supportFootExtent < 0){
-				ri.animation.supportFootExtent += 1
+		if (ri.currentlyPressedKeys['KeyW']) 
+			{
+			if(ri.animation.supportFootExtent < 1){
+				ri.animation.supportFootExtent += 0.5 * delta
+				supportFoot1.position.y += 0.5 * delta
+				supportFoot2.position.y += 0.5 * delta
+				supportFoot3.position.y += 0.5 * delta
+				supportFoot4.position.y += 0.5 * delta
+
 			}
 		}
 		if (ri.currentlyPressedKeys['KeyS']) {
+			if(ri.animation.supportFootExtent > -1.5){
+				ri.animation.supportFootExtent -= 0.5 * delta
+				supportFoot1.position.y -= 0.5 * delta
+				supportFoot2.position.y -= 0.5 * delta
+				supportFoot3.position.y -= 0.5 * delta
+				supportFoot4.position.y -= 0.5 * delta
+
+			}
 			
 		}
 		if (ri.currentlyPressedKeys['KeyA']) {
+			if(ri.animation.supportArmExtent > 0){
+				ri.animation.supportArmExtent -= 0.7* delta 
+				supportArm1.position.z -= 0.7* delta 
+				supportArm2.position.z -= 0.7* delta
+				supportArm3.position.z -= 0.7* delta
+				supportArm4.position.z -= 0.7* delta
+
+			}
+
 			
 		}
 		if (ri.currentlyPressedKeys['KeyD']) {
+			if(ri.animation.supportArmExtent < 6){
+				ri.animation.supportArmExtent += 0.7* delta 
+				supportArm1.position.z += 0.7* delta 
+				supportArm2.position.z += 0.7* delta
+				supportArm3.position.z += 0.7* delta
+				supportArm4.position.z += 0.7* delta
+
+			}
 			
 		}
 	
-		
-		
+	}
+	if(ri.selectedControl == 2){
+		if (ri.currentlyPressedKeys['KeyW']) {
+			if (ri.animation.boomAngle > -Math.PI/3 ){
+				ri.animation.boomAngle -= 0.1 * delta
+				firstBoom.rotateX(-0.1 * delta)
+			}
+			
+			
+		}
+		if (ri.currentlyPressedKeys['KeyS']) {
+			if(ri.animation.boomAngle < 0) {
+				ri.animation.boomAngle += 0.1 * delta
+				firstBoom.rotateX(0.1 * delta)
 
+			}
+
+		}
+		if (ri.currentlyPressedKeys['KeyA']) {
+
+			craneBoomBase.rotateY(0.5 * delta)
+			console.log('Key A ', ri.animation.craneBoomBaseAngle)
+			
+		}
+		if (ri.currentlyPressedKeys['KeyD']) {
+			craneBoomBase.rotateY(-0.5 * delta)
+			console.log('Key D ', ri.animation.craneBoomBaseAngle)
+			
+		}
+	
+	}
+
+	if (ri.selectedControl == 3){
+		if (ri.currentlyPressedKeys['KeyW']){
+
+		}
+		if (ri.currentlyPressedKeys['KeyS']){
+			
+		}
+		if (ri.currentlyPressedKeys['KeyA']){
+			if(ri.animation.secondBoomExtent < 40){
+				ri.animation.secondBoomExtent += 4 * delta
+				secondBoom.position.z += 4 * delta
+			}
+			
+		}
+		
+		if (ri.currentlyPressedKeys['KeyD']){
+			if(ri.animation.secondBoomExtent > 6){
+				ri.animation.secondBoomExtent -= 4 * delta
+				secondBoom.position.z -= 4 * delta
+			}
+			
+		}
 
 	}
 	
@@ -278,6 +399,34 @@ function addSceneObjectsContinued(textureObjects) {
   }
 
 
+  function updateWireMesh(){
+	//wire mellom craneboom1 og craneboom2
+	let wirePoint1 = ri.scene.getObjectByName('wirePoint1')
+	let wirePoint2 = ri.scene.getObjectByName('wirePoint2')
+
+	// Henter Line-meshet:
+	let wireLineMesh = ri.scene.getObjectByName('wireMesh', true);
+	// Henter world-position for start og endepunkt til vaieren:
+	const lineVertexPositions = wireLineMesh.geometry.attributes.position.array;
+
+	const lineStartPos = new THREE.Vector3();
+	wirePoint1.getWorldPosition(lineStartPos);
+	lineVertexPositions[0] = lineStartPos.x;
+	lineVertexPositions[1] = lineStartPos.y;
+	lineVertexPositions[2] = lineStartPos.z;
+
+	const lineEndPos = new THREE.Vector3();
+	wirePoint2.getWorldPosition(lineEndPos);
+	lineVertexPositions[3] = lineEndPos.x;
+	lineVertexPositions[4] = lineEndPos.y;
+	lineVertexPositions[5] = lineEndPos.z;
+	wireLineMesh.geometry.attributes.position.needsUpdate = true;
+	wireLineMesh.geometry.computeBoundingBox();
+	wireLineMesh.geometry.computeBoundingSphere();
+	
+  }
+
+
 
 
 
@@ -295,15 +444,16 @@ function createCrane(textureObjects){
 	styrHus.position.set(-25.5, 2.5, -6);
 	Crane.add(styrHus);
 
-	let supportArms1 = createSupportArmPair(ri)
+	let supportArms1 = createSupportArmPair(ri, '1')
 	supportArms1.position.set(-2, 4.7, 6.5)
 	Crane.add(supportArms1)
 
-	let supportArms2 = createSupportArmPair(ri)
+	let supportArms2 = createSupportArmPair(ri, '2')
 	supportArms2.position.set(18, 4.7, 6.5)
 	Crane.add(supportArms2)
 
 	let craneBoomBase = createCraneBoomBase(ri);
+	craneBoomBase.name = 'craneBoomBase'
 	craneBoomBase.position.set(12.5, 7.5, 0)
 	craneBoomBase.rotateY(ri.animation.craneBoomBaseAngle)
 	Crane.add(craneBoomBase)

@@ -365,7 +365,7 @@ function createHeadlight(ri){
 
 
 
-function createSupportArm(ri){
+function createSupportArm(ri, name){
 let supportArm = new THREE.Group();
 
     let bar1Geometry = new THREE.BoxGeometry(1.2, 2.5, 7);
@@ -376,6 +376,7 @@ let supportArm = new THREE.Group();
     supportArm.add(bar1)
     let bar2Geometry = new THREE.BoxGeometry(1, 2.1, 6)
     let bar2 = new THREE.Mesh(bar2Geometry, blackBaseMaterial)
+    bar2.name = 'supportArm' + name
     bar2.castShadow = true;
     bar2.position.z = ri.animation.supportArmExtent
     bar1.add(bar2)
@@ -388,6 +389,7 @@ let supportArm = new THREE.Group();
 
     let cylinder2Geometry = new THREE.CylinderGeometry(0.4, 0.4, 3);
     let cylinder2 = new THREE.Mesh(cylinder2Geometry, whiteBaseMaterial)
+    cylinder2.name = 'supportFoot' + name
     cylinder2.castShadow = true;
     cylinder2.position.y = ri.animation.supportFootExtent
     cylinder1.add(cylinder2)
@@ -404,12 +406,13 @@ let supportArm = new THREE.Group();
 }
 
 
-export function createSupportArmPair(ri){
+export function createSupportArmPair(ri, name){
     let arms = new THREE.Group();
-
-    let arm1 = createSupportArm(ri)
+    let name1 = name +'1'
+    let arm1 = createSupportArm(ri, name1)
     arms.add(arm1)
-    let arm2 = createSupportArm(ri)
+    let name2 = name + '2'
+    let arm2 = createSupportArm(ri, name2)
     arm2.rotation.y = Math.PI;
     arm2.position.z = -13
     arms.add(arm2)
@@ -600,6 +603,7 @@ export function createCraneBoom(ri){
 
     let firstBoomGeometry = new THREE.ExtrudeGeometry(firstBoomShape, {depth: 40, bevelEnabled: false})
     let firstBoom = new THREE.Mesh(firstBoomGeometry, whiteBaseMaterial)
+    firstBoom.name = 'firstBoom'
     firstBoom.castShadow= true;
     firstBoom.rotateY(-Math.PI/2)
     firstBoom.rotateX(ri.animation.boomAngle)
@@ -612,7 +616,7 @@ export function createCraneBoom(ri){
     let wirePoint = new THREE.Mesh(wirePointGeometry, blackBaseMaterial)
     wirePoint.name = 'wirePoint1'
     wirePoint.rotateX(Math.PI/2)
-    wirePoint.position.set(0.5, 5, 40.1)
+    wirePoint.position.set(0.6, 4.7, 40.1)
 
     firstBoom.add(wirePoint)
 
@@ -632,6 +636,7 @@ export function createCraneBoom(ri){
 
     let secondBoomGeometry = new THREE.ExtrudeGeometry(secondBoomShape, {depth: 35, bevelEnabled: false})
     let secondBoom = new THREE.Mesh(secondBoomGeometry, blackBaseMaterial)
+    secondBoom.name = 'secondBoom'
     secondBoom.castShadow = true;
     secondBoom.position.set(0.1, 0.5, ri.animation.secondBoomExtent)
     firstBoom.add(secondBoom)
