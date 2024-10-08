@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
 import GUI from "lil-gui";
-import { createPlane, createSupportArmPair, createCraneBody, createTirePair, createStyrHus } from "./helpers";
+import { createPlane, createSupportArmPair, createCraneBody, createTirePair, createStyrHus, createCraneBoomBase, createCraneBoom } from "./helpers";
 
 const ri = {
 	currentlyPressedKeys:[]
@@ -26,13 +26,42 @@ export function main() {
 	// lil-gui kontroller:
 	ri.lilGui = new GUI();
 
+	//animasjonsInfo
+	ri.animation = {
+		boomAngle: -Math.PI/3,
+		secondBoomExtent : 40,
+		supportArmExtent : 6,
+		supportFootExtent: -1.5,
+		craneBoomBaseAngle: 0
+
+
+	}
+
+	ri.selectedControl = 1;
+
+	// oppdater selectedControl
+	function updateSelectedControl(value){
+	ri.selectedControl = parseInt(value); 
+	console.log("Selected control:", ri.selectedControl);
+  	};
+  
+  	// event listeners
+  	document.querySelectorAll('input[name="controls"]').forEach((radio) => {
+	radio.addEventListener('change', function() {
+	  updateSelectedControl(this.value);
+	});
+  });
+  
+  	const checkedRadio = document.querySelector('input[name="controls"]:checked');
+  	updateSelectedControl(checkedRadio.value);
+
 	// Lys
 	addLights();
 
 	// Kamera:
 	ri.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-	ri.camera.position.x = -1;
-	ri.camera.position.y =10;
+	ri.camera.position.x = 5;
+	ri.camera.position.y =20;
 	ri.camera.position.z = 20;
 
 	// TrackballControls:
@@ -58,6 +87,7 @@ function handleKeyUp(event) {
 
 function handleKeyDown(event) {
 	ri.currentlyPressedKeys[event.code] = true;
+	console.log('KeyDown: ', event.code)
 }
 
 function addSceneObjects() {
@@ -89,7 +119,7 @@ function addSceneObjects() {
 
 function addLights() {
 	// Ambient:
-	let ambientLight1 = new THREE.AmbientLight(0xffffff, 0.5);
+	let ambientLight1 = new THREE.AmbientLight(0xffffff, 0.3);
 	ambientLight1.visible = true;
 	ri.scene.add(ambientLight1);
 	const ambientFolder = ri.lilGui.addFolder( 'Ambient Light' );
@@ -100,7 +130,7 @@ function addLights() {
 	// Pointlight:
 	let pointLight = new THREE.PointLight(0xffffff, 1000);
 	pointLight.visible = true;
-	pointLight.position.set(10, 20, 6);
+	pointLight.position.set(-20, 40, 35);
 	pointLight.shadow.mapSize.width = 1024;
 	pointLight.shadow.mapSize.height = 1024;
 	pointLight.castShadow = true;
@@ -120,18 +150,27 @@ function addLights() {
 
 	//** RETNINGSORIENTERT LYS (som gir skygge):
 	let directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-	directionalLight.visible = false;
-	directionalLight.position.set(0, 6, 0);
+	directionalLight.visible = true;
+	directionalLight.position.set(0, 60, 40);
+	directionalLight.shadow.mapSize.width = 1024;
+	directionalLight.shadow.mapSize.height = 1024;
+	directionalLight.shadow.camera.left = -50;
+	directionalLight.shadow.camera.right = 50;
+	directionalLight.shadow.camera.top = 50;
+	directionalLight.shadow.camera.bottom = -50;
+	directionalLight.shadow.camera.near = 1;
+	directionalLight.shadow.camera.far = 200;
 	directionalLight.castShadow = true;
 	ri.scene.add(directionalLight);
 	// Viser lyskilden:
-	const directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight, 10, 0xff0000);
-	directionalLightHelper.visible = false;
+	const directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight, 50, 0xff0000);
+	directionalLightHelper.visible = true;
 	ri.scene.add(directionalLightHelper);
 
 	//lil-gui:
 	const directionalFolder = ri.lilGui.addFolder( 'Directional Light' );
-	directionalFolder.add(directionalLight, 'visible').name("On/Off");
+	directionalFolder.add(directionalLight, 'visible').name("On/Off").onChange(value => {
+		directionalLightHelper.visible = value;});
 	directionalFolder.add(directionalLight, 'intensity').min(0).max(1).step(0.01).name("Intensity");
 	directionalFolder.addColor(directionalLight, 'color').name("Color");
 }
@@ -172,11 +211,67 @@ function onWindowResize() {
 
 //Sjekker tastaturet:
 function handleKeys(delta) {
+
+	if(ri.selectedControl == 1){
+		//hev / senk støttefot
+		if (ri.currentlyPressedKeys['KeyW']) {
+			if(ri.animation.supportFootExtent < 0){
+				ri.animation.supportFootExtent += 1
+			}
+		}
+		if (ri.currentlyPressedKeys['KeyS']) {
+			
+		}
+		if (ri.currentlyPressedKeys['KeyA']) {
+			
+		}
+		if (ri.currentlyPressedKeys['KeyD']) {
+			
+		}
+	
+		
+		
+
+
+	}
+	
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
 
 function addSceneObjectsContinued(textureObjects) {
 	let crane = createCrane(textureObjects)
 	ri.scene.add(crane)
+
+	//wire mellom craneboom1 og craneboom2
+	let wirePoint1 = crane.getObjectByName('wirePoint1')
+	let wirePoint2 = crane.getObjectByName('wirePoint2')
+	// Definerer Line-meshet (beståemde av to punkter):
+	const lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000 } );
+	const points = [];
+	const startPoint = new THREE.Vector3();
+	const endPoint = new THREE.Vector3();
+	wirePoint1.getWorldPosition(startPoint);
+	wirePoint2.getWorldPosition(endPoint);
+	points.push(startPoint);
+	points.push(endPoint);
+	const lineGeometry = new THREE.BufferGeometry().setFromPoints( points );
+	const wireMesh = new THREE.Line( lineGeometry, lineMaterial );
+	wireMesh.name = "wireMesh";
+	ri.scene.add(wireMesh);
 
 	createPlane(ri, textureObjects)
     animate(0);
@@ -200,13 +295,22 @@ function createCrane(textureObjects){
 	styrHus.position.set(-25.5, 2.5, -6);
 	Crane.add(styrHus);
 
-	let supportArms1 = createSupportArmPair()
+	let supportArms1 = createSupportArmPair(ri)
 	supportArms1.position.set(-2, 4.7, 6.5)
 	Crane.add(supportArms1)
 
-	let supportArms2 = createSupportArmPair()
+	let supportArms2 = createSupportArmPair(ri)
 	supportArms2.position.set(18, 4.7, 6.5)
 	Crane.add(supportArms2)
+
+	let craneBoomBase = createCraneBoomBase(ri);
+	craneBoomBase.position.set(12.5, 7.5, 0)
+	craneBoomBase.rotateY(ri.animation.craneBoomBaseAngle)
+	Crane.add(craneBoomBase)
+
+	let craneBoom = createCraneBoom(ri);
+	craneBoom.position.set(5,4.5,-1.5)
+	craneBoomBase.add(craneBoom)
 
 	return Crane
 }

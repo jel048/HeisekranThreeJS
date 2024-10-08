@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { clearcoat, cubeTexture, metalness } from "three/webgpu";
 
 
 export function createPlane(ri, textureObjects){
@@ -116,6 +117,10 @@ export function createCraneBody(ri){
     whiteBase.position.y = 1.5;
     craneBody.add(whiteBase);
 
+    let ladder = createRedLadder(ri)
+    ladder.position.set(-4.7,-1.95, 6)
+    whiteBase.add(ladder)
+
     let wheelBaseGeometry = new THREE.BoxGeometry(35, 3, 6)
     let wheelBase = new THREE.Mesh(wheelBaseGeometry, blackBaseMaterial)
     wheelBase.castShadow = true;
@@ -170,6 +175,11 @@ export function createCraneBody(ri){
     rightDetail.castShadow = true;
     rightDetail.position.set(-13.5, 5, 4)
     craneBody.add(rightDetail)
+    let chimney = addChimney(ri)
+    chimney.position.set(-2, 2, 0)
+    rightDetail.add(chimney)
+
+
     let leftDetail = new THREE.Mesh(blackTopBoxDetail, blackBaseMaterial);
     leftDetail.castShadow = true;
     leftDetail.position.set(-13.5, 5, -4)
@@ -219,12 +229,61 @@ export function createStyrHus(ri) {
     styrhusDel.position.z = 7
     styrHus.add(styrhusDel)
 
+    //vinduer
+    let windowMaterial = new THREE.MeshPhysicalMaterial({color: 0x555555, roughness: 0, metalness :1, clearcoat: 1})
+    windowMaterial.envMap = ri.cubeTexture;
+
+    //front
+    let frontWindowGeometry = new THREE.BoxGeometry(0.2,5,4)
+    let frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial)
+    frontWindow.rotateZ(-Math.PI/8)
+    frontWindow.position.set(1.05, 5, 2.5)
+    styrhusDel.add(frontWindow)
+
+    //sidevinduer
+    let sidevindu1Geometry = new THREE.BoxGeometry(3.5, 3, 0.2)
+    let sidevindu2Geometry = new THREE.BoxGeometry(1, 3, 0.2)
+    let sidevindu3RightShape = new THREE.Shape()
+    sidevindu3RightShape.moveTo(0,0)
+    sidevindu3RightShape.lineTo(1,0)
+    sidevindu3RightShape.lineTo(1,3)
+    sidevindu3RightShape.lineTo(0,0)
+    let sidevindu3RightGeometry = new THREE.ExtrudeGeometry(sidevindu3RightShape, {depth: 0.1, bevelEnabled : false})
+    let sidevindu3Right = new THREE.Mesh(sidevindu3RightGeometry, windowMaterial)
+    sidevindu3Right.position.set(-3, -1.5, 0)
+    
+
+
+    let rightSideVindu1 =   new THREE.Mesh(sidevindu1Geometry, windowMaterial)
+    let rightSideVindu2 = new THREE.Mesh(sidevindu2Geometry, windowMaterial)
+    rightSideVindu2.position.x = 3
+    let rightSideVinduer = new THREE.Group()
+    rightSideVinduer.add(rightSideVindu1)
+    rightSideVinduer.add(rightSideVindu2)
+    rightSideVinduer.add(sidevindu3Right)
+    rightSideVinduer.position.set(4, 5.5, 5)
+
+    let leftSideVindu1 =   new THREE.Mesh(sidevindu1Geometry, windowMaterial)
+    let leftSideVindu2 = new THREE.Mesh(sidevindu2Geometry, windowMaterial)
+    leftSideVindu2.position.x =2.5 
+
+    let sidevindu3Left = new THREE.Mesh(sidevindu3RightGeometry, windowMaterial)
+    sidevindu3Left.position.set(-2.9,-1.5,0)
+
+
+    let leftSideVinduer = new THREE.Group()
+    leftSideVinduer.add(leftSideVindu1)
+    leftSideVinduer.add(leftSideVindu2)
+    leftSideVinduer.add(sidevindu3Left)
+    leftSideVinduer.position.set(3.8, 5.5, -0.1)
+
+    styrhusDel.add(rightSideVinduer)
+    styrhusDel.add(leftSideVinduer)
+
+
     let styrHusLightbar = CreatestyrhusLightBar(redBaseMaterial, ri)
     styrHusLightbar.position.set(-0.1, 1.25, 6);
     styrHus.add(styrHusLightbar)
-
-
-
 
 
     return styrHus
@@ -245,10 +304,7 @@ function CreatestyrhusLightBar(material, ri){
 
 
 
-    
-
     // add lys til hver
-
 
     let LeftLight = createHeadlight(ri)
     let RightLight = createHeadlight(ri)
@@ -271,26 +327,6 @@ function CreatestyrhusLightBar(material, ri){
 
 
 
-function createExtrudeTriangle() {
-    let triangleShape = new THREE.Shape();
-
-    // Definer 2D trekant
-    triangleShape.moveTo(0, 0);       
-    triangleShape.lineTo(0, 1);         
-    triangleShape.lineTo(10, 0);        
-    triangleShape.lineTo(0, 0);         
-
-    // Extrude  (z)
-    let extrudeSettings = {
-        depth: 4,                      // Set the depth (z = 4)
-        bevelEnabled: false             // Disable bevel to keep sharp edges
-    };
-
-    
-    let triangleGeometry = new THREE.ExtrudeGeometry(triangleShape, extrudeSettings);
-
-    return triangleGeometry;
-}
 
 
 
@@ -329,7 +365,7 @@ function createHeadlight(ri){
 
 
 
-function createSupportArm(){
+function createSupportArm(ri){
 let supportArm = new THREE.Group();
 
     let bar1Geometry = new THREE.BoxGeometry(1.2, 2.5, 7);
@@ -341,7 +377,7 @@ let supportArm = new THREE.Group();
     let bar2Geometry = new THREE.BoxGeometry(1, 2.1, 6)
     let bar2 = new THREE.Mesh(bar2Geometry, blackBaseMaterial)
     bar2.castShadow = true;
-    bar2.position.z = 5
+    bar2.position.z = ri.animation.supportArmExtent
     bar1.add(bar2)
 
     let cylinder1Geometry = new THREE.CylinderGeometry(0.5, 0.5, 1);
@@ -353,7 +389,7 @@ let supportArm = new THREE.Group();
     let cylinder2Geometry = new THREE.CylinderGeometry(0.4, 0.4, 3);
     let cylinder2 = new THREE.Mesh(cylinder2Geometry, whiteBaseMaterial)
     cylinder2.castShadow = true;
-    cylinder2.position.y = -1.5
+    cylinder2.position.y = ri.animation.supportFootExtent
     cylinder1.add(cylinder2)
 
     let coneGeometry = new THREE.CylinderGeometry(0.01, 1, 1.2);
@@ -368,12 +404,12 @@ let supportArm = new THREE.Group();
 }
 
 
-export function createSupportArmPair(){
+export function createSupportArmPair(ri){
     let arms = new THREE.Group();
 
-    let arm1 = createSupportArm()
+    let arm1 = createSupportArm(ri)
     arms.add(arm1)
-    let arm2 = createSupportArm()
+    let arm2 = createSupportArm(ri)
     arm2.rotation.y = Math.PI;
     arm2.position.z = -13
     arms.add(arm2)
@@ -386,4 +422,375 @@ export function createSupportArmPair(){
     arms.add(midBox)
 
     return arms
+}
+
+
+
+
+export function createCraneBoomBase(ri){
+    let craneBoomBase = new THREE.Group();
+
+    let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.9});
+    whiteBaseMaterial.envMap = ri.cubeTexture;
+    let blackBaseMaterial = new THREE.MeshStandardMaterial({color: 0x444444, roughness: 0.3, metalness : 0.6});
+    //Hvit box
+    let baseWhiteBoxGeometry = new THREE.BoxGeometry(11, 5, 12);
+    let baseWhiteBox = new THREE.Mesh(baseWhiteBoxGeometry, whiteBaseMaterial)
+    baseWhiteBox.castShadow = true;
+    craneBoomBase.add(baseWhiteBox)
+
+    let ladder = createRedLadder(ri)
+    ladder.position.set(-7, -1.95, 6)
+    //hvit box tak
+    let whiteBoxRoofGeometry = new THREE.BoxGeometry(15, 1, 12)
+    let whiteBoxRoof = new THREE.Mesh(whiteBoxRoofGeometry, whiteBaseMaterial)
+    whiteBoxRoof.castShadow = true;
+    whiteBoxRoof.position.set(2, 3, 0)
+    baseWhiteBox.add(whiteBoxRoof)
+    whiteBoxRoof.add(ladder)
+
+    let fence1 = createFence(ri, whiteBaseMaterial)
+    fence1.position.set(-4, 1.5, 5.5)
+    whiteBoxRoof.add(fence1)
+
+    let fence2 = createFence(ri, whiteBaseMaterial)
+    fence2.position.set(-4, 1.5, -5.5)
+    whiteBoxRoof.add(fence2)
+
+    let rightBoomSupport = createBoomSupport(whiteBaseMaterial)
+    rightBoomSupport.position.set(-7.5, 0.5, 2.5)
+    whiteBoxRoof.add(rightBoomSupport)
+
+    let leftBoomSupport = createBoomSupport(whiteBaseMaterial)
+    leftBoomSupport.position.set(-7.5, 0.5, -4.5)
+    whiteBoxRoof.add(leftBoomSupport)
+
+    let roofCylinderGeometry = new THREE.CylinderGeometry(2,2,4)
+    let roofCylinder = new THREE.Mesh(roofCylinderGeometry, whiteBaseMaterial)
+    roofCylinder.castShadow = true;
+    roofCylinder.rotateX(Math.PI/2)
+    roofCylinder.position.set(6, 1.8, -1.5)
+    whiteBoxRoof.add(roofCylinder)
+
+    let roofCylinder2Geometry = new THREE.CylinderGeometry(0.5,0.5,4.2)
+    let roofCylinder2 = new THREE.Mesh(roofCylinder2Geometry, blackBaseMaterial)
+    roofCylinder2.castShadow = true;
+    roofCylinder2.rotateX(Math.PI/2)
+    roofCylinder2.position.set(6, 1.8, -1.5)
+    whiteBoxRoof.add(roofCylinder2)
+
+
+
+    //svart boks bak
+    let blackBoxBackGeometry = new THREE.BoxGeometry(4, 5, 16);
+    let blackBoxBack = new THREE.Mesh(blackBoxBackGeometry, blackBaseMaterial)
+    blackBoxBack.castShadow = true;
+    blackBoxBack.position.set(7.5, 0, 0)
+    craneBoomBase.add(blackBoxBack)
+
+    let styrhus = createCraneStyrhus(ri, whiteBaseMaterial)
+    styrhus.position.set(-9.5, -2.5, -2.5)
+    craneBoomBase.add(styrhus)
+
+    //rotasjonsbase
+    let rotationCylinderGeometry = new THREE.CylinderGeometry(3, 3, 1)
+    let rotationCylinder = new THREE.Mesh(rotationCylinderGeometry, blackBaseMaterial)
+    rotationCylinder.position.set(0, 0, 0)
+
+    craneBoomBase.position.y = 3
+    rotationCylinder.add(craneBoomBase)
+    
+
+
+
+
+
+
+
+
+
+
+
+
+    return rotationCylinder;
+}
+
+
+
+
+
+function createCraneStyrhus(ri, material){
+    let craneStyrhus = new THREE.Group();
+    let styrhusShape = new THREE.Shape();
+    styrhusShape.moveTo(0,0);
+    styrhusShape.lineTo(4,0);
+    styrhusShape.lineTo(4,8);
+    styrhusShape.lineTo(1,8);
+    styrhusShape.lineTo(-1, 2);
+    styrhusShape.lineTo(0,0)
+    let styrHusGeometry = new THREE.ExtrudeGeometry(styrhusShape, {depth: 5, bevelEnabled: false});
+    let styrhusDel = new THREE.Mesh(styrHusGeometry, material)
+    styrhusDel.castShadow = true;
+    styrhusDel.position.set(0,0, 3.5)
+    craneStyrhus.add(styrhusDel)
+    //vinduer
+    let windowMaterial = new THREE.MeshPhysicalMaterial({color: 0x555555, roughness: 0, metalness :1, clearcoat: 1})
+    windowMaterial.envMap = ri.cubeTexture;
+
+    let sideVinduShape = new THREE.Shape()
+    sideVinduShape.moveTo(0,0)
+    sideVinduShape.lineTo(1, 0)
+    sideVinduShape.lineTo(3.4, 1)
+    sideVinduShape.lineTo(3.4, 4)
+    sideVinduShape.lineTo(1, 4)
+    sideVinduShape.lineTo(0, 0)
+    let sidevinduGeometry = new THREE.ExtrudeGeometry(sideVinduShape, {depth: 0.2, bevelEnabled: false})
+
+    let rightSideVindu = new THREE.Mesh(sidevinduGeometry, windowMaterial)
+    rightSideVindu.position.set(0.2, 3.8, 8.5)
+    let leftSideVindu = new THREE.Mesh(sidevinduGeometry, windowMaterial)
+    leftSideVindu.position.set(0.2, 3.8,3.3)
+
+    let frontVinduGeometry = new THREE.BoxGeometry(0.2, 5, 4)
+    let frontVindu = new THREE.Mesh(frontVinduGeometry, windowMaterial)
+    frontVindu.rotateZ(-Math.PI/9.5)
+    frontVindu.position.set(0.2, 5.5, 6)
+
+
+    craneStyrhus.add(rightSideVindu)
+    craneStyrhus.add(leftSideVindu)
+    craneStyrhus.add(frontVindu)
+
+    
+    
+    return craneStyrhus
+
+}
+
+function createBoomSupport(material){
+    let supportShape = new THREE.Shape();
+    supportShape.moveTo(0,0)
+    supportShape.lineTo(12, 0)
+    supportShape.lineTo(12, 2)
+    supportShape.lineTo(7, 2)
+    supportShape.lineTo(0,1)
+    supportShape.lineTo(0,0)
+    let supportGeometry = new THREE.ExtrudeGeometry(supportShape, {depth: 2, bevelEnabled: false})
+    let support = new THREE.Mesh(supportGeometry, material)
+    support.castShadow = true;
+    return support
+}
+
+export function createCraneBoom(ri){
+    let craneBoom = new THREE.Group()
+    let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.9});
+    whiteBaseMaterial.envMap = ri.cubeTexture;
+    let blackBaseMaterial = new THREE.MeshStandardMaterial({color: 0x444444, roughness: 0.3, metalness : 0.6});
+    //1st
+    let firstBoomShape = new THREE.Shape()
+    firstBoomShape.moveTo(0,0)
+    firstBoomShape.lineTo(1, 0)
+    firstBoomShape.lineTo(1.5, 0.5)
+    firstBoomShape.lineTo(1.5, 4.5)
+    firstBoomShape.lineTo(1, 5.5)
+    firstBoomShape.lineTo(0, 5.5)
+    firstBoomShape.lineTo(-0.5, 4.5)
+    firstBoomShape.lineTo(-0.5, 0.5)
+    firstBoomShape.lineTo(0,0)
+
+    let firstBoomGeometry = new THREE.ExtrudeGeometry(firstBoomShape, {depth: 40, bevelEnabled: false})
+    let firstBoom = new THREE.Mesh(firstBoomGeometry, whiteBaseMaterial)
+    firstBoom.castShadow= true;
+    firstBoom.rotateY(-Math.PI/2)
+    firstBoom.rotateX(ri.animation.boomAngle)
+    craneBoom.add(firstBoom)
+    let blackDisk = createBlackDisk(ri)
+    blackDisk.position.set(1.5,4,30)
+    firstBoom.add(blackDisk)
+
+    let wirePointGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1)
+    let wirePoint = new THREE.Mesh(wirePointGeometry, blackBaseMaterial)
+    wirePoint.name = 'wirePoint1'
+    wirePoint.rotateX(Math.PI/2)
+    wirePoint.position.set(0.5, 5, 40.1)
+
+    firstBoom.add(wirePoint)
+
+
+
+
+    let secondBoomShape = new THREE.Shape()
+    secondBoomShape.moveTo(0,0)
+    secondBoomShape.lineTo(0.8, 0)
+    secondBoomShape.lineTo(1.1, 0.3)
+    secondBoomShape.lineTo(1.1, 3.4)
+    secondBoomShape.lineTo(0.8, 3.7)
+    secondBoomShape.lineTo(0, 3.7)
+    secondBoomShape.lineTo(-0.3, 3.4)
+    secondBoomShape.lineTo(-0.3, 0.3)
+    secondBoomShape.lineTo(0,0)
+
+    let secondBoomGeometry = new THREE.ExtrudeGeometry(secondBoomShape, {depth: 35, bevelEnabled: false})
+    let secondBoom = new THREE.Mesh(secondBoomGeometry, blackBaseMaterial)
+    secondBoom.castShadow = true;
+    secondBoom.position.set(0.1, 0.5, ri.animation.secondBoomExtent)
+    firstBoom.add(secondBoom)
+
+    let boomEndShape = new THREE.Shape();
+    boomEndShape.moveTo(0,0)
+    boomEndShape.lineTo(4.5,0)
+    boomEndShape.lineTo(5.5, 1,5)
+    boomEndShape.lineTo(-1, 1.5)
+    boomEndShape.lineTo(-1, 1)
+    boomEndShape.lineTo(0,0)
+    let boomEndGeometry = new THREE.ExtrudeGeometry(boomEndShape,{depth: 2, bevelEnabled: false} ) 
+    let boomEnd = new THREE.Mesh(boomEndGeometry, blackBaseMaterial)
+    boomEnd.castShadow = true;
+    boomEnd.rotateZ(Math.PI/2)
+    boomEnd.rotateX(Math.PI/2)
+    boomEnd.position.set(-0.5, -0.5 ,35)
+    secondBoom.add(boomEnd)
+
+    let wirePoint2Geometry = new THREE.CylinderGeometry(0.3, 0.3, 1)
+    let wirePoint2 = new THREE.Mesh(wirePoint2Geometry, blackBaseMaterial)
+    wirePoint2.name = 'wirePoint2'
+    wirePoint2.position.set(4.7, 0, 1)
+    boomEnd.add(wirePoint2)
+
+    
+
+    
+    
+    return craneBoom
+
+
+}
+
+
+
+function createRedLadder(ri){
+    let redBaseMaterial = new THREE.MeshStandardMaterial({color: 0xee2222, roughness: 0.1, metalness : 0.9});
+    redBaseMaterial.envMap = ri.cubeTexture;
+    let ladderGrp = new THREE.Group()
+
+    let verticalBarGeometry = new THREE.BoxGeometry(0.3, 5, 0.3)
+    let horizontalBarGeometry = new THREE.BoxGeometry(2, 0.3, 0.3)
+    let leftBar = new THREE.Mesh(verticalBarGeometry, redBaseMaterial)
+    let rightBar = new THREE.Mesh(verticalBarGeometry, redBaseMaterial)
+    rightBar.position.x = 2
+    
+
+    let bar1 = new THREE.Mesh(horizontalBarGeometry, redBaseMaterial)
+    bar1.position.set(1, 2, 0)
+    let bar2 = new THREE.Mesh(horizontalBarGeometry, redBaseMaterial)
+    bar2.position.set(1, 1, 0)
+    let bar3 = new THREE.Mesh(horizontalBarGeometry, redBaseMaterial)
+    bar3.position.set(1, 0, 0)
+    let bar4 = new THREE.Mesh(horizontalBarGeometry, redBaseMaterial)
+    bar4.position.set(1, -1, 0)
+    let bar5 = new THREE.Mesh(horizontalBarGeometry, redBaseMaterial)
+    bar5.position.set(1, -2, 0)
+
+    ladderGrp.add(leftBar)
+    ladderGrp.add(rightBar)
+    ladderGrp.add(bar1)
+    ladderGrp.add(bar2)
+    ladderGrp.add(bar3)
+    ladderGrp.add(bar4)
+    ladderGrp.add(bar5)
+
+
+    return ladderGrp
+}
+
+
+
+function createFence(ri, material){
+    let fenceGrp = new THREE.Group()
+    
+    let verticalPoleGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2)
+    let horizontalBarGeometry = new THREE.CylinderGeometry(0.1, 0.1, 10)
+
+    let pole1 = new THREE.Mesh(verticalPoleGeometry, material)
+    let pole2 = new THREE.Mesh(verticalPoleGeometry, material)
+    pole2.position.x = 5
+    let pole3 = new THREE.Mesh(verticalPoleGeometry, material)
+    pole3.position.x = 10
+
+    let bar1 = new THREE.Mesh(horizontalBarGeometry, material)
+    bar1.rotateZ(Math.PI/2)
+    bar1.position.y = 0.7
+    let bar2 = new THREE.Mesh(horizontalBarGeometry, material)
+    bar2.rotateZ(Math.PI/2)
+    bar2.position.y = -0.5
+
+    pole2.add(bar1)
+    pole2.add(bar2)
+
+
+    fenceGrp.add(pole1)
+    fenceGrp.add(pole2)
+    fenceGrp.add(pole3)
+
+
+
+    return fenceGrp
+}
+
+
+function createBlackDisk(ri){
+
+    let diskGeometry = new THREE.CylinderGeometry(3, 3, 0.5, 32); 
+    let diskMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.9});
+    whiteBaseMaterial.envMap = ri.cubeTexture;
+    let disk = new THREE.Mesh(diskGeometry, diskMaterial);
+    disk.castShadow = true;
+    disk.rotation.z = Math.PI / 2; // Roter til stående
+
+    let smallerDiskGeometry = new THREE.CylinderGeometry(1.5, 1.5,0.4)
+    let smallerDisk = new THREE.Mesh(smallerDiskGeometry, whiteBaseMaterial)
+    smallerDisk.position.y = -0.2
+    disk.add(smallerDisk)
+    
+    let spokeGrp = new THREE.Group()
+
+    for (let i = 0; i < 4; i++) {
+        let spokeGeometry = new THREE.CylinderGeometry(0.1, 0.1, 6, 16);  
+        let spoke = new THREE.Mesh(spokeGeometry, whiteBaseMaterial);
+        let angle = i * Math.PI/4;
+        spoke.rotation.z = angle 
+        spokeGrp.add(spoke);}
+
+    
+    spokeGrp.rotateX(Math.PI/2)    
+    spokeGrp.position.set(0, -0.2, 0)
+    disk.add(spokeGrp)
+
+
+
+
+    return disk
+
+
+
+}
+
+
+function addChimney(ri){
+    let chimneyMaterial = new THREE.MeshStandardMaterial()
+    chimneyMaterial.metalness = 1;
+    chimneyMaterial.roughness =0.01;
+    chimneyMaterial.side = 
+    chimneyMaterial.envMap = ri.cubeTexture;
+    let chimneyBaseGeometry = new THREE.CylinderGeometry(0.3, 0.3, 4)
+    let chimneyBase = new THREE.Mesh(chimneyBaseGeometry, chimneyMaterial) 
+    let chimneyBendGeometry = new THREE.TorusGeometry(1, 0.3, 10, 10, 2.5)
+    let chimneyBend = new THREE.Mesh(chimneyBendGeometry, chimneyMaterial)
+    chimneyBend.rotateY(Math.PI)
+    chimneyBend.position.set(1,2,0)
+    chimneyBase.add(chimneyBend)
+
+
+    return chimneyBase
 }
