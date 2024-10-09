@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
 import GUI from "lil-gui";
-import { createPlane, createSupportArmPair, createCraneBody, createTirePair, createStyrHus, createCraneBoomBase, createCraneBoom } from "./helpers";
+import { createPlane, createSupportArmPair, createCraneBody, createTirePair, createStyrHus, createCraneBoomBase, createCraneBoom, createHook } from "./helpers";
 
 const ri = {
 	currentlyPressedKeys:[]
@@ -32,7 +32,8 @@ export function main() {
 		secondBoomExtent : 10,
 		supportArmExtent : 6,
 		supportFootExtent: -1.5,
-		craneBoomBaseAngle: 0
+		craneBoomBaseAngle: 0,
+		hookExtent: 6,
 
 
 	}
@@ -109,6 +110,7 @@ function addSceneObjects() {
     const textureLoader = new THREE.TextureLoader(loadingManager);
     const textureObjects = [];
     textureObjects[0] = textureLoader.load('../../../assets/textures/metal_tread_plate1_512x512_color.jpg');
+	textureObjects[1] = textureLoader.load('../../../assets/textures/redLines.png');
     loadingManager.onLoad = () => {
       // Fortsetter...
 	  ri.scene.background = ri.cubeTexture;
@@ -333,9 +335,17 @@ function handleKeys(delta,
 
 	if (ri.selectedControl == 3){
 		if (ri.currentlyPressedKeys['KeyW']){
+			if(ri.animation.hookExtent > 1){
+				ri.animation.hookExtent -= 5 * delta
+
+			}
 
 		}
 		if (ri.currentlyPressedKeys['KeyS']){
+			if(ri.animation.hookExtent < 100){
+				ri.animation.hookExtent += 5 * delta
+
+			}
 			
 		}
 		if (ri.currentlyPressedKeys['KeyA']){
@@ -358,10 +368,6 @@ function handleKeys(delta,
 	
 
 
-
-
-
-
 }
 
 
@@ -378,8 +384,8 @@ function addSceneObjectsContinued(textureObjects) {
 	ri.scene.add(crane)
 
 	//wire mellom craneboom1 og craneboom2
-	let wirePoint1 = crane.getObjectByName('wirePoint1')
-	let wirePoint2 = crane.getObjectByName('wirePoint2')
+	let wirePoint1 = ri.scene.getObjectByName('wirePoint1')
+	let wirePoint2 = ri.scene.getObjectByName('wirePoint2')
 	// Definerer Line-meshet (beståemde av to punkter):
 	const lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000 } );
 	const points = [];
@@ -393,6 +399,27 @@ function addSceneObjectsContinued(textureObjects) {
 	const wireMesh = new THREE.Line( lineGeometry, lineMaterial );
 	wireMesh.name = "wireMesh";
 	ri.scene.add(wireMesh);
+
+
+	const wirePoint3 = ri.scene.getObjectByName('wirePoint3')
+	const points2 = [];
+	const startPoint2 = new THREE.Vector3();
+	const endPoint2 = new THREE.Vector3();
+ 	wirePoint3.getWorldPosition(startPoint2);
+
+	let hook = createHook(ri)
+	hook.name = 'hook'
+	hook.position.set(startPoint2.x, startPoint2.y - ri.animation.hookExtent, startPoint2.z)
+	ri.scene.add(hook)
+	const wirePoint4 = ri.scene.getObjectByName('wirePoint4')
+	wirePoint4.getWorldPosition(endPoint2)
+	points2.push(startPoint2)
+	points2.push(endPoint2)
+	const lineGeometry2 = new THREE.BufferGeometry().setFromPoints( points2 );
+	const wireMesh2 = new THREE.Line( lineGeometry2, lineMaterial );
+	wireMesh2.name = "HookWire";
+	ri.scene.add(wireMesh2);
+	
 
 	createPlane(ri, textureObjects)
     animate(0);
@@ -423,6 +450,37 @@ function addSceneObjectsContinued(textureObjects) {
 	wireLineMesh.geometry.attributes.position.needsUpdate = true;
 	wireLineMesh.geometry.computeBoundingBox();
 	wireLineMesh.geometry.computeBoundingSphere();
+
+
+	//wire mellom boomEnd og krok
+	let wirePoint3 = ri.scene.getObjectByName('wirePoint3')
+	let wirePoint4 = ri.scene.getObjectByName('wirePoint4')
+
+	// Henter Line-meshet:
+	let wireLineMesh2 = ri.scene.getObjectByName('HookWire', true);
+	// Henter world-position for start og endepunkt til vaieren:
+	const lineVertexPositions2 = wireLineMesh2.geometry.attributes.position.array;
+
+	const lineStartPos2 = new THREE.Vector3();
+	wirePoint3.getWorldPosition(lineStartPos2);
+	lineVertexPositions2[0] = lineStartPos2.x;
+	lineVertexPositions2[1] = lineStartPos2.y;
+	lineVertexPositions2[2] = lineStartPos2.z;
+
+	const lineEndPos2 = new THREE.Vector3();
+	wirePoint4.getWorldPosition(lineEndPos2);
+	lineVertexPositions2[3] = lineEndPos2.x;
+	lineVertexPositions2[4] = lineEndPos2.y;
+	lineVertexPositions2[5] = lineEndPos2.z;
+	wireLineMesh2.geometry.attributes.position.needsUpdate = true;
+	wireLineMesh2.geometry.computeBoundingBox();
+	wireLineMesh2.geometry.computeBoundingSphere();
+
+	let hook = ri.scene.getObjectByName('hook')
+	hook.position.set(lineStartPos2.x, lineStartPos2.y - ri.animation.hookExtent, lineStartPos2.z)
+
+
+
 	
   }
 
@@ -444,11 +502,11 @@ function createCrane(textureObjects){
 	styrHus.position.set(-25.5, 2.5, -6);
 	Crane.add(styrHus);
 
-	let supportArms1 = createSupportArmPair(ri, '1')
+	let supportArms1 = createSupportArmPair(ri, '1', textureObjects)
 	supportArms1.position.set(-2, 4.7, 6.5)
 	Crane.add(supportArms1)
 
-	let supportArms2 = createSupportArmPair(ri, '2')
+	let supportArms2 = createSupportArmPair(ri, '2', textureObjects)
 	supportArms2.position.set(18, 4.7, 6.5)
 	Crane.add(supportArms2)
 
@@ -459,7 +517,7 @@ function createCrane(textureObjects){
 	Crane.add(craneBoomBase)
 
 	let craneBoom = createCraneBoom(ri);
-	craneBoom.position.set(5,4.5,-1.5)
+	craneBoom.position.set(5.9,4.5,-1.5)
 	craneBoomBase.add(craneBoom)
 
 	return Crane

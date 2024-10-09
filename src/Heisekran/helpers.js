@@ -365,12 +365,15 @@ function createHeadlight(ri){
 
 
 
-function createSupportArm(ri, name){
+function createSupportArm(ri, name,textureObjects){
 let supportArm = new THREE.Group();
 
     let bar1Geometry = new THREE.BoxGeometry(1.2, 2.5, 7);
     let blackBaseMaterial = new THREE.MeshStandardMaterial({color: 0x444444, roughness: 0.3, metalness : 0.6});
     let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.6});
+    whiteBaseMaterial.envMap = ri.cubeTexture;
+
+
     let bar1 = new THREE.Mesh(bar1Geometry, blackBaseMaterial)
     bar1.castShadow = true;
     supportArm.add(bar1)
@@ -381,8 +384,11 @@ let supportArm = new THREE.Group();
     bar2.position.z = ri.animation.supportArmExtent
     bar1.add(bar2)
 
+    let cylinder1Material = new THREE.MeshStandardMaterial({map: textureObjects[1], roughness: 0.3, metalness : 0.6});
+    cylinder1Material.envMap = ri.cubeTexture;
+
     let cylinder1Geometry = new THREE.CylinderGeometry(0.5, 0.5, 1);
-    let cylinder1 = new THREE.Mesh(cylinder1Geometry, whiteBaseMaterial)
+    let cylinder1 = new THREE.Mesh(cylinder1Geometry, cylinder1Material)
     cylinder1.castShadow = true;
     cylinder1.position.set(0, -1.5, 2.5)
     bar2.add(cylinder1)
@@ -406,13 +412,13 @@ let supportArm = new THREE.Group();
 }
 
 
-export function createSupportArmPair(ri, name){
+export function createSupportArmPair(ri, name, textureObjects){
     let arms = new THREE.Group();
     let name1 = name +'1'
-    let arm1 = createSupportArm(ri, name1)
+    let arm1 = createSupportArm(ri, name1, textureObjects)
     arms.add(arm1)
     let name2 = name + '2'
-    let arm2 = createSupportArm(ri, name2)
+    let arm2 = createSupportArm(ri, name2, textureObjects)
     arm2.rotation.y = Math.PI;
     arm2.position.z = -13
     arms.add(arm2)
@@ -468,18 +474,18 @@ export function createCraneBoomBase(ri){
     leftBoomSupport.position.set(-7.5, 0.5, -4.5)
     whiteBoxRoof.add(leftBoomSupport)
 
-    let roofCylinderGeometry = new THREE.CylinderGeometry(2,2,4)
+    let roofCylinderGeometry = new THREE.CylinderGeometry(3,3,4)
     let roofCylinder = new THREE.Mesh(roofCylinderGeometry, whiteBaseMaterial)
     roofCylinder.castShadow = true;
     roofCylinder.rotateX(Math.PI/2)
-    roofCylinder.position.set(6, 1.8, -1.5)
+    roofCylinder.position.set(6, 1.8, -1)
     whiteBoxRoof.add(roofCylinder)
 
     let roofCylinder2Geometry = new THREE.CylinderGeometry(0.5,0.5,4.2)
     let roofCylinder2 = new THREE.Mesh(roofCylinder2Geometry, blackBaseMaterial)
     roofCylinder2.castShadow = true;
     roofCylinder2.rotateX(Math.PI/2)
-    roofCylinder2.position.set(6, 1.8, -1.5)
+    roofCylinder2.position.set(6, 1.8, -1)
     whiteBoxRoof.add(roofCylinder2)
 
 
@@ -662,11 +668,69 @@ export function createCraneBoom(ri){
     wirePoint2.position.set(4.7, 0, 1)
     boomEnd.add(wirePoint2)
 
-    
+    let wirePoint3Geometry = new THREE.CylinderGeometry(0.2, 0.2, 1)
+    let wirePoint3 = new THREE.Mesh(wirePoint3Geometry, blackBaseMaterial)
+    wirePoint3.name = 'wirePoint3'
+    wirePoint3.rotateZ(Math.PI/2)
+    wirePoint3.position.set(-0.5, 1, 1)
+    boomEnd.add(wirePoint3)
 
     
-    
     return craneBoom
+
+
+}
+
+
+export function createHook(ri){
+    let hookMaterial = new THREE.MeshStandardMaterial({color: 0x555555, roughness: 0.4, metalness : 0.6});
+    hookMaterial.envMap = ri.cubeTexture;
+    let hookBaseShape = new THREE.Shape()
+    hookBaseShape.moveTo(0,0)
+    hookBaseShape.lineTo(0.4, 0)
+    hookBaseShape.lineTo(0.4, 0.2)
+    hookBaseShape.lineTo(0.5, 0.2)
+    hookBaseShape.lineTo(0.5, 0.4)
+    hookBaseShape.lineTo(0.4, 1)
+    hookBaseShape.lineTo(0, 1)
+    hookBaseShape.lineTo(-0.1, 0.4 )
+    hookBaseShape.lineTo(-0.1, 0.2)
+    hookBaseShape.lineTo(0, 0.2)
+    hookBaseShape.lineTo(0, 0)
+    let hookBaseGeometry = new THREE.ExtrudeGeometry(hookBaseShape, {depth: 0.5, bevelEnabled: false})
+    let hookBase = new THREE.Mesh(hookBaseGeometry, hookMaterial)
+    hookBase.castShadow = true;
+
+    let wirePoint4Geometry = new THREE.CylinderGeometry(0.2, 0.2, 1)
+    let wirePoint4 = new THREE.Mesh(wirePoint4Geometry, hookMaterial)
+    wirePoint4.name = 'wirePoint4'
+    wirePoint4.position.set(0.2, 1.3, 0.25)
+    hookBase.add(wirePoint4)
+
+    let hookShape = new THREE.Shape()
+    hookShape.moveTo(0,0)
+    hookShape.lineTo(0.15, 0.04)
+    hookShape.lineTo(0.25, 0.1)
+    hookShape.lineTo(0.3, 0.18)
+    hookShape.lineTo(0.1, 0.45)
+    hookShape.lineTo(0.05, 0.45)
+    hookShape.lineTo(0.15, 0.2)
+    hookShape.lineTo(0.05, 0.15)
+    hookShape.lineTo(-0.1, 0.3)
+    hookShape.lineTo(-0.05, 0.05)
+    hookShape.lineTo(0,0)
+    let hookGeometry = new THREE.ExtrudeGeometry(hookShape, {depth: 0.2, bevelEnabled: false})
+    let hook = new THREE.Mesh(hookGeometry, hookMaterial)
+    hook.scale.set(2.5,2.5,2.5)
+    hook.castShadow = true;
+    hook.position.y = -1
+
+    hookBase.add(hook)
+
+
+
+    return hookBase
+
 
 
 }
