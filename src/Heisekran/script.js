@@ -109,7 +109,7 @@ function addSceneObjects() {
 	)
     const textureLoader = new THREE.TextureLoader(loadingManager);
     const textureObjects = [];
-    textureObjects[0] = textureLoader.load('../../../assets/textures/metal_tread_plate1_512x512_color.jpg');
+    textureObjects[0] = textureLoader.load('../../../assets/textures/ground.jpg');
 	textureObjects[1] = textureLoader.load('../../../assets/textures/redLines.png');
     loadingManager.onLoad = () => {
       // Fortsetter...
@@ -510,7 +510,7 @@ function createCrane(textureObjects){
 	supportArms2.position.set(18, 4.7, 6.5)
 	Crane.add(supportArms2)
 
-	let craneBoomBase = createCraneBoomBase(ri);
+	let craneBoomBase = createCraneBoomBase(ri, textureObjects);
 	craneBoomBase.name = 'craneBoomBase'
 	craneBoomBase.position.set(12.5, 7.5, 0)
 	craneBoomBase.rotateY(ri.animation.craneBoomBaseAngle)

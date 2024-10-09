@@ -111,11 +111,35 @@ export function createCraneBody(ri){
     let whiteBaseGeometry = new THREE.BoxGeometry(25,  1, 12);
     let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.9});
     whiteBaseMaterial.envMap = ri.cubeTexture;
+    let redBaseMaterial = new THREE.MeshStandardMaterial({color: 0xee2222, roughness: 0.1, metalness : 0.9});
+    redBaseMaterial.envMap = ri.cubeTexture;
     let whiteBase =  new THREE.Mesh(whiteBaseGeometry, whiteBaseMaterial);
     whiteBase.castShadow = true;
     whiteBase.position.x = 5;
     whiteBase.position.y = 1.5;
     craneBody.add(whiteBase);
+
+    let redDetailShape = new THREE.Shape()
+    redDetailShape.moveTo(0,0)
+    redDetailShape.lineTo(2, 0)
+    redDetailShape.lineTo(2, 1)
+    redDetailShape.lineTo(12, 1)
+    redDetailShape.lineTo(12, 6)
+    redDetailShape.lineTo(2,6)
+    redDetailShape.lineTo(2, 7)
+    redDetailShape.lineTo(0,7)
+    redDetailShape.lineTo(0,0)
+    let redDetailGeometry = new THREE.ExtrudeGeometry(redDetailShape, {depth : 0.2, bevelEnabled :false})
+    let redDetail = new THREE.Mesh(redDetailGeometry, redBaseMaterial)
+    redDetail.position.set(-8, 0.6, -3.5)
+    redDetail.rotateX(Math.PI/2)
+    
+    whiteBase.add(redDetail)
+    
+
+
+
+
 
     let ladder = createRedLadder(ri)
     ladder.position.set(-4.7,-1.95, 6)
@@ -436,7 +460,7 @@ export function createSupportArmPair(ri, name, textureObjects){
 
 
 
-export function createCraneBoomBase(ri){
+export function createCraneBoomBase(ri, textureObjects){
     let craneBoomBase = new THREE.Group();
 
     let whiteBaseMaterial = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.3, metalness : 0.9});
@@ -496,6 +520,36 @@ export function createCraneBoomBase(ri){
     blackBoxBack.castShadow = true;
     blackBoxBack.position.set(7.5, 0, 0)
     craneBoomBase.add(blackBoxBack)
+
+    //røde detaljer
+    let detailMap = textureObjects[1]
+    detailMap.center.set(0.5, 0.5)
+    detailMap.rotation = -Math.PI / 2
+
+    let detailMaterial = new THREE.MeshStandardMaterial({map: textureObjects[1], roughness: 0.3, metalness : 0.9});
+    detailMaterial.envMap = ri.cubeTexture;
+    let detailGeometry = new THREE.BoxGeometry(0.5, 5, 0.2)
+    let detail1 = new THREE.Mesh(detailGeometry, detailMaterial)
+    detail1.position.set(-1.7, 0, 8 )
+    let detail2 = new THREE.Mesh(detailGeometry, detailMaterial)
+    detail2.position.set(1.7, 0, 8 )
+    let detail3 = new THREE.Mesh(detailGeometry, detailMaterial)
+    detail3.position.set(-1.7, 0, -8 )
+    let detail4 = new THREE.Mesh(detailGeometry, detailMaterial)
+    detail4.position.set(1.7, 0, -8)
+
+
+
+
+    blackBoxBack.add(detail1)
+    blackBoxBack.add(detail2)
+    blackBoxBack.add(detail3)
+    blackBoxBack.add(detail4)
+
+
+
+
+
 
     let styrhus = createCraneStyrhus(ri, whiteBaseMaterial)
     styrhus.position.set(-9.5, -2.5, -2.5)
