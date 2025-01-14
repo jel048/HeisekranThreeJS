@@ -3,7 +3,7 @@
 Full coding timelapse: https://youtu.be/N3mHkMvP_vQ
 
 ***
-<img width="800" height="800" src="static/heisekran.jpg" alt="Crane" >
+<img width="800" height="600" src="static/heisekran.jpg" alt="Crane" >
 ***
 
 
