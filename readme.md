@@ -1,5 +1,12 @@
-# Three.js Startprosjekt
-#### Basert på oppsett fra Three.js Journey
+## Three.js School Project - Recreate Link-Belt ATC-3275 All Terrain Crane in Three.js
+
+Full coding timelapse: https://youtu.be/N3mHkMvP_vQ
+
+***
+<img width="800" height="800" src="static/heisekran.jpg" alt="Crane" >
+***
+
+
 ## Installasjon
 Last ned [Node.js](https://nodejs.org/en/download/).
 Installer og bruk følgende kommandoer:
