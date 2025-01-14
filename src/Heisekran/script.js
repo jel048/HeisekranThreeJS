@@ -140,7 +140,7 @@ function addLights() {
 	ri.scene.add(pointLight);
 	// Viser lyskilden:
 	const pointLightHelper = new THREE.PointLightHelper( pointLight, 1 );
-	pointLightHelper.visible = true;
+	pointLightHelper.visible = false;
 	ri.scene.add( pointLightHelper );
 	//lil-gui:
 	const pointLigthFolder = ri.lilGui.addFolder( 'Pointlight' );
@@ -167,7 +167,7 @@ function addLights() {
 	ri.scene.add(directionalLight);
 	// Viser lyskilden:
 	const directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight, 50, 0xff0000);
-	directionalLightHelper.visible = true;
+	directionalLightHelper.visible = false;
 	ri.scene.add(directionalLightHelper);
 
 	//lil-gui:
@@ -322,11 +322,13 @@ function handleKeys(delta,
 		if (ri.currentlyPressedKeys['KeyA']) {
 
 			craneBoomBase.rotateY(0.5 * delta)
+			ri.animation.craneBoomBaseAngle += 0.5 * delta
 			console.log('Key A ', ri.animation.craneBoomBaseAngle)
 			
 		}
 		if (ri.currentlyPressedKeys['KeyD']) {
 			craneBoomBase.rotateY(-0.5 * delta)
+			ri.animation.craneBoomBaseAngle -= 0.5 * delta
 			console.log('Key D ', ri.animation.craneBoomBaseAngle)
 			
 		}

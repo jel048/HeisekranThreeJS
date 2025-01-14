@@ -6,8 +6,29 @@
     <title>Heisekran, three.js</title>
     <link rel="stylesheet" href="./style.css">
 </head>
+<style>
+  input[type="radio"] {
+    width: 25px;
+    height: 25px;
+    accent-color: #4CAF50; 
+  }
+</style>
+<div style="position: absolute; top:10px;  left:25px; width:100%; text-align:left; color:black;" class="ui">
+  <h2 style="font-size: 35px; font-weight: bold; color: red;">Choose what to control with WASD</h2>
+
+
+  <!--set of radio buttons -->
+  <label for="supportArms" style="font-size: 30px; color: red; margin-left: 8px; cursor: pointer;">Support Arms</label>
+  <input type="radio" id="supportArms" name="controls" value="1" checked><br>
+  
+  <label for="baseAndHook" style="font-size: 30px; color: red; margin-left: 8px; cursor: pointer;">Crane base and Boom angle</label>
+  <input type="radio" id="baseAndHook" name="controls" value="2"><br>
+  
+  <label for="craneBoom" style="font-size: 30px; color: red; margin-left: 8px; cursor: pointer;">Crane Boom and Hook</label>
+  <input type="radio" id="craneBoom" name="controls" value="3"><br>
+
+</div>
 <body>
-    <h2>Heisekran, three.js</h2>
     <script type="module">
 		import {main} from "./script.js";
 		main();
